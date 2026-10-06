@@ -1,0 +1,6 @@
+{
+  "name": "วันสุข - จัดการชีวิตประจำวัน",
+  "description": "ระบบจัดการชีวิตประจำวันแบบง่ายๆ ติดตามกิจวัตร นิสัย สิ่งที่ต้องทำ ดื่มน้ำ อารมณ์ และสรุปภาพรวม",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

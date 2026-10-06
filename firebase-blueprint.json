@@ -1,0 +1,52 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user's Firebase Auth UID" },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "format": "email" },
+        "photoURL": { "type": "string" },
+        "dailyWaterTarget": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid"]
+    },
+    "DayRecord": {
+      "title": "DayRecord",
+      "description": "Daily life record for habits, routines, water and mood",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "routines": { "type": "array" },
+        "tasks": { "type": "array" },
+        "habits": { "type": "array" },
+        "waterIntake": { "type": "number" },
+        "waterTarget": { "type": "number" },
+        "sleepHours": { "type": "number" },
+        "mood": { "type": "string" },
+        "energyLevel": { "type": "number" },
+        "weather": { "type": "string" },
+        "moodTags": { "type": "array" },
+        "dailyHighlight": { "type": "string", "maxLength": 500 },
+        "journalNote": { "type": "string", "maxLength": 2000 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "date"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile document"
+    },
+    "/users/{userId}/dayRecords/{dateStr}": {
+      "schema": "DayRecord",
+      "description": "Daily life record stored by user and date"
+    }
+  }
+}
