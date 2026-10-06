@@ -3,6 +3,8 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   User,
@@ -90,13 +92,60 @@ export async function testFirestoreConnection() {
 }
 testFirestoreConnection();
 
-export async function signInWithGoogle(): Promise<User | null> {
+export interface SignInResult {
+  user: User | null;
+  error?: {
+    code: string;
+    message: string;
+    domain?: string;
+  };
+}
+
+// Check redirect result on initialization
+export async function checkRedirectAuth(): Promise<User | null> {
+  try {
+    const result = await getRedirectResult(auth);
+    return result?.user || null;
+  } catch (error: any) {
+    console.warn('Redirect auth check:', error);
+    return null;
+  }
+}
+
+export async function signInWithGoogle(): Promise<SignInResult> {
   try {
     const result = await signInWithPopup(auth, googleProvider);
-    return result.user;
-  } catch (error) {
-    console.error('Sign in error:', error);
-    return null;
+    return { user: result.user };
+  } catch (error: any) {
+    console.error('Sign in error details:', error);
+    const errorCode = error?.code || 'unknown';
+    const currentDomain = typeof window !== 'undefined' ? window.location.hostname : '';
+
+    // If popup was blocked or mobile browser, try redirect flow
+    if (errorCode === 'auth/popup-blocked') {
+      try {
+        await signInWithRedirect(auth, googleProvider);
+        return { user: null };
+      } catch (redirectErr: any) {
+        return {
+          user: null,
+          error: {
+            code: redirectErr?.code || errorCode,
+            message: redirectErr?.message || error?.message,
+            domain: currentDomain,
+          },
+        };
+      }
+    }
+
+    return {
+      user: null,
+      error: {
+        code: errorCode,
+        message: error?.message || 'ไม่สามารถเข้าสู่ระบบได้',
+        domain: currentDomain,
+      },
+    };
   }
 }
 
@@ -107,3 +156,4 @@ export async function logOut(): Promise<void> {
     console.error('Logout error:', error);
   }
 }
+

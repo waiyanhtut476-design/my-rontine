@@ -18,7 +18,7 @@ import {
   resetAllData,
 } from './utils/storage';
 import { launchCelebration, sounds } from './utils/audio';
-import { auth, signInWithGoogle, logOut } from './firebase';
+import { auth, signInWithGoogle, logOut, checkRedirectAuth, SignInResult } from './firebase';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import {
   saveDayRecordToFirestore,
@@ -45,6 +45,7 @@ import { EditTaskModal } from './components/EditTaskModal';
 import { AddHabitModal } from './components/AddHabitModal';
 import { EditHabitModal } from './components/EditHabitModal';
 import { SettingsModal } from './components/SettingsModal';
+import { AuthErrorModal } from './components/AuthErrorModal';
 
 export default function App() {
   const [selectedDate, setSelectedDate] = useState<string>(getTodayDateString());
@@ -54,6 +55,12 @@ export default function App() {
   const [streakCount, setStreakCount] = useState<number>(() => calculateStreak());
   const [user, setUser] = useState<User | null>(null);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [authError, setAuthError] = useState<{ code: string; message: string; domain?: string } | null>(null);
+
+  // Check redirect auth on load
+  useEffect(() => {
+    checkRedirectAuth().catch((e) => console.warn('Redirect auth check error:', e));
+  }, []);
 
   // Modals state
   const [isAddRoutineOpen, setIsAddRoutineOpen] = useState(false);
@@ -389,6 +396,14 @@ export default function App() {
     return loadPast7DaysRecords();
   }, [dayRecord, selectedDate]);
 
+  // Sign In Handler with error capture
+  const handleSignIn = async () => {
+    const result = await signInWithGoogle();
+    if (result.error) {
+      setAuthError(result.error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50/70 text-slate-800 flex flex-col pb-20 md:pb-12">
       {/* 1. Header */}
@@ -399,7 +414,7 @@ export default function App() {
         overallPercent={overallPercent}
         onOpenSettings={() => setIsSettingsOpen(true)}
         user={user}
-        onSignIn={signInWithGoogle}
+        onSignIn={handleSignIn}
         onSignOut={logOut}
         isSyncing={isSyncing}
       />
@@ -535,8 +550,16 @@ export default function App() {
         onSaveSettings={handleSaveSettings}
         onResetAllData={handleResetAllData}
         user={user}
-        onSignIn={signInWithGoogle}
+        onSignIn={handleSignIn}
         onSignOut={logOut}
+      />
+
+      <AuthErrorModal
+        isOpen={!!authError}
+        onClose={() => setAuthError(null)}
+        errorCode={authError?.code}
+        errorMessage={authError?.message}
+        domain={authError?.domain}
       />
     </div>
   );
