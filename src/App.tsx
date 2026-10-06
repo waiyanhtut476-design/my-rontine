@@ -45,7 +45,6 @@ import { EditTaskModal } from './components/EditTaskModal';
 import { AddHabitModal } from './components/AddHabitModal';
 import { EditHabitModal } from './components/EditHabitModal';
 import { SettingsModal } from './components/SettingsModal';
-import { PWAInstallModal } from './components/PWAInstallModal';
 
 export default function App() {
   const [selectedDate, setSelectedDate] = useState<string>(getTodayDateString());
@@ -65,7 +64,6 @@ export default function App() {
   const [isAddHabitOpen, setIsAddHabitOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<HabitItem | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
 
   // Load record whenever selected date changes
   useEffect(() => {
@@ -400,7 +398,6 @@ export default function App() {
         streakCount={streakCount}
         overallPercent={overallPercent}
         onOpenSettings={() => setIsSettingsOpen(true)}
-        onOpenInstallModal={() => setIsInstallModalOpen(true)}
         user={user}
         onSignIn={signInWithGoogle}
         onSignOut={logOut}
@@ -537,15 +534,9 @@ export default function App() {
         settings={settings}
         onSaveSettings={handleSaveSettings}
         onResetAllData={handleResetAllData}
-        onOpenInstallModal={() => {
-          setIsSettingsOpen(false);
-          setIsInstallModalOpen(true);
-        }}
-      />
-
-      <PWAInstallModal
-        isOpen={isInstallModalOpen}
-        onClose={() => setIsInstallModalOpen(false)}
+        user={user}
+        onSignIn={signInWithGoogle}
+        onSignOut={logOut}
       />
     </div>
   );
